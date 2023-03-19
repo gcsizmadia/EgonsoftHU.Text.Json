@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33502.453
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A76046ED-B34D-43EF-A77C-3AC86DAF0C07}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		src\app.manifest = src\app.manifest
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{8415CD55-78E4-4455-9B10-E385CE54A81C}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgonsoftHU.Text.Json", "src\EgonsoftHU.Text.Json\EgonsoftHU.Text.Json.csproj", "{71B0D8D8-9D13-4FF3-9D98-DB83D0556B92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71B0D8D8-9D13-4FF3-9D98-DB83D0556B92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71B0D8D8-9D13-4FF3-9D98-DB83D0556B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71B0D8D8-9D13-4FF3-9D98-DB83D0556B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71B0D8D8-9D13-4FF3-9D98-DB83D0556B92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {046295D6-2EE9-4ED3-9D39-75912E121253}
+	EndGlobalSection
+EndGlobal
