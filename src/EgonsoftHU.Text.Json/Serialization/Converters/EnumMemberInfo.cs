@@ -119,7 +119,7 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
             {
                 TypeInfo typeInfo = typeof(TEnum).GetTypeInfo();
 
-                var ex = new ArgumentException("Enum types with System.FlagsAttribute not supported.", nameof(value));
+                var ex = new ArgumentException("Undefined enum values not supported.", nameof(value));
                 ex.Data["EnumType"] = typeInfo.FullName ?? typeInfo.Name;
                 ex.Data["Value"] = value;
 
