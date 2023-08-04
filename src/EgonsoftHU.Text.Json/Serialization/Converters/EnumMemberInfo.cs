@@ -2,7 +2,7 @@
 // This code is licensed under MIT license (see LICENSE for details)
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -81,7 +81,7 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
                 Description = description
             };
 
-            EnumMemberInfo<TEnum>.Cache.Add(key, enumMemberInfo);
+            EnumMemberInfo<TEnum>.Cache.TryAdd(key, enumMemberInfo);
 
             return enumMemberInfo;
         }
@@ -180,7 +180,7 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
     internal class EnumMemberInfo<TEnum>
         where TEnum : struct, Enum
     {
-        internal static Dictionary<ulong, EnumMemberInfo<TEnum>> Cache { get; } = new();
+        internal static ConcurrentDictionary<ulong, EnumMemberInfo<TEnum>> Cache { get; } = new();
 
         public ulong UInt64Value { get; internal init; }
 
