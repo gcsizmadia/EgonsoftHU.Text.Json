@@ -1,14 +1,13 @@
 ﻿// Copyright © 2023 Gabor Csizmadia
 // This code is licensed under MIT license (see LICENSE for details)
 
-using Serilog;
-using Serilog.Events;
-using Serilog.Formatting.Compact;
-
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
+
+using Serilog;
+using Serilog.Events;
 
 using Xunit.Abstractions;
 
@@ -18,10 +17,6 @@ namespace EgonsoftHU.Text.Json.UnitTests
     {
         private const string OutputTemplate =
             "{Timestamp:yyyy-MM-dd HH:mm:ss.fffffff zzz} [{Level:u3}] {Message:lj} ==> {Properties}{NewLine}{Exception}";
-
-#pragma warning disable IDE0052 // Remove unread private members
-        private static readonly CompactJsonFormatter formatter = new();
-#pragma warning restore IDE0052 // Remove unread private members
 
         public ILogger? Logger { get; private set; }
 
@@ -44,7 +39,6 @@ namespace EgonsoftHU.Text.Json.UnitTests
             loggerConfiguration
                 .MinimumLevel.Verbose()
                 .WriteTo.File(
-                    // formatter: formatter,
                     path: Path.Combine(AppContext.BaseDirectory, "xunit-output.log"),
                     restrictedToMinimumLevel: LogEventLevel.Verbose,
                     outputTemplate: OutputTemplate,
