@@ -4,20 +4,27 @@
 [![Nuget](https://img.shields.io/nuget/v/EgonsoftHU.Text.Json?label=NuGet)](https://www.nuget.org/packages/EgonsoftHU.Text.Json)
 [![Nuget](https://img.shields.io/nuget/dt/EgonsoftHU.Text.Json?label=Downloads)](https://www.nuget.org/packages/EgonsoftHU.Text.Json)
 
-`System.Text.Json` extensions. Includes a `JsonStringEnumConverter` that supports `EnumMemberAttribute`.
+`System.Text.Json` extensions.
+
+- Supports any attribute for enum member serialization.
+- Provides option for using your own custom serializer implementation for enum members.
+- Many more...
 
 ## Table of Contents
 
 - [Introduction](#introduction)
 - [Releases](#releases)
 - [Features](#features)
-  * [Naming policies](#naming-policies)
-  * [EnumMemberAttribute support](#enummemberattribute-support)
+  * [EnumValueSerializer](#enumvalueserializer)
+    + [Default implementation](#default-implementation)
+  * [JsonEnumValueSerializer](#jsonenumvalueserializer)
+    + [Value precedence](#value-precedence)
+  * [Custom implementation of EnumValueSerializer](#custom-implementation-of-enumvalueserializer)
   * [JsonStringEnumConverter](#jsonstringenumconverter)
-    + [Serialization](#serialization)
-    + [Deserialization](#deserialization)
+  * [JsonSerializerOptionsProvider](#jsonserializeroptionsprovider)
   * [JsonSerializerOptions extension method](#jsonserializeroptions-extension-method)
-  * [Unsupported features](#unsupported-features)
+  * [Naming policies](#naming-policies)
+- [Example configuration](#example-configuration)
 
 ## Introduction
 
@@ -32,106 +39,128 @@ You can find the release notes [here](https://github.com/gcsizmadia/EgonsoftHU.T
 
 ## Features
 
-`System.Text.Json` does not implement various naming policies.
-
-The only available `JsonNamingPolicy` is `JsonCamelCaseNamingPolicy` that is available through `JsonNamingPolicy.CamelCase` property.
-
-There are casings that are not (yet) supported by `System.Text.Json`:
-
-- `UPPER_SNAKE_CASE`
-- `lower_snake_case`
-- `UPPER-KEBAB-CASE`
-- `lower-kebab-case`
-
 This library comes with the following features.
 
-### Naming policies
+### EnumValueSerializer
 
-- `EgonsoftHU.Text.Json.JsonUpperCaseNamingPolicy`
-- `EgonsoftHU.Text.Json.JsonLowerCaseNamingPolicy`
+This library can make use of an implementation of this base class provided by the `EgonsoftHU.Extensions.Bcl` (`>= 3.0.0`) nuget package.
 
-### EnumMemberAttribute support
+It has a static `Current` property that can be set to your custom implementation.
 
-Using `EnumMemberAttribute` you can specify the desired output for JSON serialization.
+#### Default implementation
 
-**With no `JsonNamingPolicy`**
+By default, the `Current` property is set to a default implementation that supports the following attribute:
+- `System.Runtime.Serialization.EnumMemberAttribute`
+
+Converting / retrieving an enum member value to / from a string uses these values in the following order, from highest to lowest priority:
+
+1. The value of the `EnumMemberAttribute.Value` property, if that attribute is applied to the current enum member.
+   - Both reading and writing are case sensitive.
+2. The name of the enum member.
+   - Reading is case insensitive.
+   - Writing is case sensitive.
+
+**Please note:**  
+The base class makes use of the `EgonsoftHU.Extensions.Bcl.Enumerations.EnumInfo<TEnum>` type.
+
+When accessing a specific `EnumInfo<TEnum>` type then its `SerializedValue` instance property
+will be initialized by the current serializer set in the `EnumValueSerializer.Current` property;
+therefore, it is highly recommended to set that property to the same implementation you will use
+for configuring JSON serializer options.
+
+### JsonEnumValueSerializer
+
+This is an implementation of the above mentioned `EgonsoftHU.Extensions.Bcl.Enumerations.Serialization.EnumValueSerializer` type and
+it supports attributes and `System.Text.Json.JsonNamingPolicy` to convert/retrieve enum member values to/from a string.
+
+The following attributes are supported:
+
+- `System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute` (available in `System.Text.Json` (`>= 9.0.0`))  
+  **Tip:**  
+  If you use an earlier version of `System.Text.Json` and target .NET 8 or earlier  then you can use this attribute by copying it into your project.
+  The fully qualified name of the type, including its namespace (but not its assembly, of course) must match.
+- `System.Runtime.Serialization.EnumMemberAttribute`
+- `System.ComponentModel.DescriptionAttribute`
+- `System.ComponentModel.DisplayNameAttribute`
+- `System.ComponentModel.DataAnnotations.DisplayAttribute` (`Description`, `Name` and `ShortName` properties are supported.)
+
+To create an instance and select an attribute using the `EgonsoftHU.Text.Json.Serialization.EnumMemberNameSelectorOption` enum type:
 
 ```csharp
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
+using System.Text.Json;
+using EgonsoftHU.Text.Json.Serialization;
+using EgonsoftHU.Text.Json.Serialization.Converters;
 
-[JsonConverter(typeof(EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter))]
-public enum CalendarWeekRule
-{
-    [EnumMember(Value = "FIRST_DAY")]
-    FirstDay = 0,
-
-    [EnumMember(Value = "FIRST_FULL_WEEK")]
-    FirstFullWeek = 1,
-
-    [EnumMember(Value = "FIRST_FOUR_DAY_WEEK")]
-    FirstFourDayWeek = 2
-}
-```
-
-**With `JsonNamingPolicy`**
-
-You can also add it to the list of the converters.
-
-The `EgonsoftHU.Text.Json.JsonStringEnumConverter` accepts a `JsonNamingPolicy` while the value in `EnumMemberAttribute` takes precedence.
-
-```csharp
-using Microsoft.AspNetCore.Builder;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder
-    .Services
-    .AddControllers()
-    .AddJsonOptions(
-        jsonOptions =>
-        jsonOptions.JsonSerializerOptions.Converters.Add(
-            new EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter(
-                new EgonsoftHU.Text.Json.JsonUpperCaseNamingPolicy()
-            )
-        )
+var serializer =
+    new JsonEnumValueSerializer(
+        JsonNamingPolicy.CamelCase,
+        // The second parameter is optional. This is the default value:
+        EnumMemberNameSelectorOption.UseJsonStringEnumMemberNameAttribute
     );
 ```
 
+#### Value precedence
+
+Converting / retrieving an enum member value to / from a string uses these values in the following order, from highest to lowest priority:
+
+1. The value of the selected attribute, if that attribute is applied to the current enum member.
+   - Both reading and writing are case sensitive.
+2. The value produced by the specified `JsonNamingPolicy`.
+   - Both reading and writing are case sensitive.
+3. The name of the enum member.
+   - Reading is case insensitive.
+   - Writing is case sensitive.
+
+### Custom implementation of EnumValueSerializer
+
+You can create and use your own `EnumValueSerializer` implementation if the above mentioned
+`JsonEnumValueSerializer` implementation does not fit your needs.
+
+Additionally, you can use the `EnumInfo<TEnum>.Attributes` instance property to access all the
+attributes that are applied to an enum member.
+
 ### JsonStringEnumConverter
 
-#### Serialization
+This is an implementation of the `System.Text.Json.Serialization.JsonConverterFactory` that you can add to the
+`System.Text.Json.JsonSerializerOptions.Converters` collection.
 
-`EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter` takes the possible values for each and every enum member in the following order, from highest to lowest priority:
+You can specify
+- a `JsonNamingPolicy`
+- a factory delegate to create an instance of an implementation of the `EnumValueSerializer` type using
+  an instance of `JsonSerializerOptions` and an instance of `JsonNamingPolicy`.
 
-1. `EnumMemberAttribute.Value` property. (In this case `JsonNamingPolicy` is ignored.)  
-   _Except if it is `null`, `String.Empty` or consists only of white-space characters._
-2. The enum member name converted using a `JsonNamingPolicy`, if specified.
-3. The enum member name as it is written, if no `JsonNamingPolicy` specified.
+### JsonSerializerOptionsProvider
 
-**Examples**
+This is a static class that provides
+- read-only default (`Default`, `DefaultWriteIndented`) properties and
+- a writable current (`Current`) property
 
-|`JsonNamingPolicy`|`EnumMemberAttribute`|Original value|Serialized value|
-|-|-|-|-|
-|not specified|not specified|`CalendarWeekRule.FirstDay`|`FirstDay`|
-|not specified|`Value = null`|`CalendarWeekRule.FirstDay`|`FirstDay`|
-|not specified|`Value = ""` (`String.Empty`)|`CalendarWeekRule.FirstDay`|`FirstDay`|
-|not specified|`Value = " "` (white-space)|`CalendarWeekRule.FirstDay`|`FirstDay`|
-|not specified|`Value = "FIRST_DAY"`|`CalendarWeekRule.FirstDay`|`FIRST_DAY`|
-|`JsonNamingPolicy.CamelCase`|not specified|`CalendarWeekRule.FirstDay`|`firstDay`|
-|`JsonNamingPolicy.CamelCase`|`Value = null`|`CalendarWeekRule.FirstDay`|`firstDay`|
-|`JsonNamingPolicy.CamelCase`|`Value = ""` (`String.Empty`)|`CalendarWeekRule.FirstDay`|`firstDay`|
-|`JsonNamingPolicy.CamelCase`|`Value = " "` (white-space)|`CalendarWeekRule.FirstDay`|`firstDay`|
-|`JsonNamingPolicy.CamelCase`|`Value = "FIRST_DAY"`|`CalendarWeekRule.FirstDay`|`FIRST_DAY`|
+to hold instances of the `System.Text.Json.JsonSerializerOptions` type.
 
-#### Deserialization
+The default instance is created this way:
 
-The converter will check if the JSON string equals to one of the following values:
-- `EnumMemberAttribute.Value` property value
-- the enum member name converted with the specified `JsonNamingPolicy`
-- the enum member name as it is written.
+```csharp
+// EgonsoftHU namespaces are displayed only for clarity.
 
-The equality check is case insensitive.
+var defaultEnumValueSerializer =
+    new EgonsoftHU.Text.Json.Serialization.Converters.JsonEnumValueSerializer(JsonNamingPolicy.CamelCase);
+
+EgonsoftHU.Extensions.Bcl.Enumerations.Serialization.EnumValueSerializer.Current = defaultEnumValueSerializer;
+
+JsonSerializerOptions options =
+    new(JsonSerializerDefaults.Web)
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        WriteIndented = false
+    };
+
+options.Converters.Add(
+    new EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter(
+        JsonNamingPolicy.CamelCase,
+        enumValueSerializerFactory: (jsonSerializerOptions, jsonNamingPolicy) => defaultEnumValueSerializer
+    )
+);
+```
 
 ### JsonSerializerOptions extension method
 
@@ -153,14 +182,54 @@ builder
     .AddJsonOptions(jsonOptions => options.CopyTo(jsonOptions.JsonSerializerOptions));
 ```
 
-### Unsupported features
+### Naming policies
 
-The current implementation does not support the followings:
+Although these are not the most wanted naming policies, they are available in case you need them.
 
-- Undefined enum values  
-  _`JsonException` will be thrown when trying to serialize._  
+- `EgonsoftHU.Text.Json.JsonUpperCaseNamingPolicy`
+- `EgonsoftHU.Text.Json.JsonLowerCaseNamingPolicy`
 
-- Enum types with `FlagsAttribute`  
-  _`EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter.CanConvert(Type)` method will return `false`._
+## Example configuration
 
-The support for these will be added later.
+In this example configuration converting / retrieving an enum member value to / from a string
+will use these values in the following order, from highest to lowest priority:
+
+1. `JsonStringEnumMemberNameAttribute.Name`, if that attribute is applied to the current enum member.
+   - Both reading and writing are case sensitive.
+2. The value produced by `JsonNamingPolicy.CamelCase`.
+   - Both reading and writing are case sensitive.
+3. The name of the enum member.
+   - Reading is case insensitive.
+   - Writing is case sensitive.
+
+```csharp
+using System.Text.Json;
+using EgonsoftHU.Text.Json.Serialization;
+using EgonsoftHU.Text.Json.Serialization.Converters;
+using Microsoft.AspNetCore.Builder;
+
+var builder = WebApplication.CreateBuilder(args);
+
+JsonSerializerOptions options =
+    new(JsonSerializerDefaults.Web)
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        WriteIndented = false
+    };
+
+options.Converters.Add(
+    new JsonStringEnumConverter(
+        JsonNamingPolicy.CamelCase
+        // If omitting the delegate factory then
+        // the value of the EnumValueSerializer.Current property will be used.
+    )
+);
+
+EnumValueSerializer.Current = new JsonEnumValueSerializer(JsonNamingPolicy.CamelCase);
+JsonSerializerOptionsProvider.Current = options;
+
+builder
+    .Services
+    .AddControllers()
+    .AddJsonOptions(jsonOptions => options.CopyTo(jsonOptions.JsonSerializerOptions));
+```
