@@ -45,7 +45,7 @@
     <MinClientVersion>4.7.0</MinClientVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="2.0.0" />
+    <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
