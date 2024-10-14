@@ -4,8 +4,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>EgonsoftHU.Text.Json</PackageId>
-    <VersionPrefix>1.1.0</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <!--
+    <VersionSuffix>$([System.String]::Format('prerelease-{0:000}-{1:0000}', $([System.DateTime]::Now.DayOfYear), $([System.Math]::Floor($([System.DateTime]::Now.TimeOfDay.TotalMinutes)))))</VersionSuffix>
+    -->
     <Authors>Gabor Csizmadia</Authors>
     <Owners>Egonsoft.HU</Owners>
     <Title>Egonsoft.HU JSON Library</Title>
