@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFrameworks>net462;net6.0;net8.0;net9.0</TargetFrameworks>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <DefineConstants>$(DefineConstants);EGONSOFTHU_TEXT_JSON_INCLUDE_JSONSTRINGENUMMEMBERNAMEATTRIBUTE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="3.0.1" />
   </ItemGroup>
@@ -16,12 +19,17 @@
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="3.0.5" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0-rc.2.24473.5" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net6.0' ">
+    <PackageReference Include="System.Text.Json" Version="9.0.0-rc.2.24473.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\EgonsoftHU.Text.Json\EgonsoftHU.Text.Json.csproj" />
