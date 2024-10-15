@@ -7,13 +7,13 @@ using System.Text.Json;
 
 #if NET9_0_OR_GREATER
 using System.Text.Json.Serialization;
-#else
-using EgonsoftHU.Extensions.Bcl;
 #endif
 
+using EgonsoftHU.Extensions.Bcl;
 using EgonsoftHU.Extensions.Bcl.Constants;
 using EgonsoftHU.Extensions.Bcl.Enumerations;
 using EgonsoftHU.Extensions.Bcl.Enumerations.Serialization;
+using EgonsoftHU.Text.Json.Constants;
 
 namespace EgonsoftHU.Text.Json.Serialization.Converters
 {
@@ -23,6 +23,14 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
     /// </summary>
     public class JsonEnumValueSerializer : EnumValueSerializer
     {
+        private const string AttributeTypeFullName = "System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute";
+        private const string AttributePropertyName = "Name";
+
+        private static readonly bool ShouldGetByName =
+            AppContext.TryGetSwitch(AppContextSwitches.AlwaysCheckForJsonStringEnumMemberAttributeByName, out bool isEnabled)
+            &&
+            isEnabled;
+
         private readonly JsonNamingPolicy? jsonNamingPolicy;
         private readonly EnumMemberNameSelectorOption nameSelectorOption;
 
@@ -147,15 +155,32 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
         private static string? GetJsonStringEnumMemberName(IEnumerationAttributes attributes)
         {
 #if NET9_0_OR_GREATER
+            return
+                ShouldGetByName
+                    ? GetJsonStringEnumMemberNameByAttributeName(attributes)
+                    : GetJsonStringEnumMemberNameByAttributeType(attributes);
 #else
-            const string AttributeTypeFullName = "System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute";
-            const string AttributePropertyName = "Name";
+            return
+                ShouldGetByName
+                    ? GetJsonStringEnumMemberNameByAttributeName(attributes)
+                    : GetJsonStringEnumMemberNameByAttributeName(attributes);
+#endif
+        }
+
+#if NET9_0_OR_GREATER
+        /// <remarks>
+        /// This method will be available for other target framework (except net6.0)
+        /// as soon as System.Text.Json (>= 9.0.0) is referenced in this project.
+        /// </remarks>
+        private static string? GetJsonStringEnumMemberNameByAttributeType(IEnumerationAttributes attributes)
+        {
+            return attributes.GetAttribute<JsonStringEnumMemberNameAttribute>()?.Name;
+        }
 #endif
 
+        private static string? GetJsonStringEnumMemberNameByAttributeName(IEnumerationAttributes attributes)
+        {
             return
-#if NET9_0_OR_GREATER
-                attributes.GetAttribute<JsonStringEnumMemberNameAttribute>()?.Name
-#else
                 attributes
                     .GetAll()
                     .FirstOrDefault(
@@ -167,10 +192,7 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
                 &&
                 value is string name
                     ? name
-                    : null
-#endif
-                ;
-
+                    : null;
         }
     }
 }
