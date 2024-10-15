@@ -258,8 +258,8 @@ Since the `JsonEnumValueSerializer` can check for this attribute by name you can
 (or migrate to) this attribute without the need to reference the newer (but not stable)
 `9.0.0` version of `System.Text.Json` nuget package.
 
-All you need to do is to create an attribute with the same name within the same namespace
-in your project.
+All you need to do is to create an attribute with the same name (`JsonStringEnumMemberNameAttribute`)
+within the same namespace (`System.Text.Json.Serialization`) in your project.
 
 You can find the source code for this attribute here:  
 [JsonStringEnumMemberNameAttribute](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonStringEnumMemberNameAttribute.cs)
