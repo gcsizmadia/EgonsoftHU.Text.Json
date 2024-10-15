@@ -25,6 +25,7 @@
   * [JsonSerializerOptions extension method](#jsonserializeroptions-extension-method)
   * [Naming policies](#naming-policies)
 - [Example configuration](#example-configuration)
+- [JsonStringEnumMemberNameAttribute support](#jsonstringenummembernameattribute-support)
 
 ## Introduction
 
@@ -76,9 +77,6 @@ it supports attributes and `System.Text.Json.JsonNamingPolicy` to convert/retrie
 The following attributes are supported:
 
 - `System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute` (available in `System.Text.Json` (`>= 9.0.0`))  
-  **Tip:**  
-  If you use an earlier version of `System.Text.Json` and target .NET 8 or earlier  then you can use this attribute by copying it into your project.
-  The fully qualified name of the type, including its namespace (but not its assembly, of course) must match.
 - `System.Runtime.Serialization.EnumMemberAttribute`
 - `System.ComponentModel.DescriptionAttribute`
 - `System.ComponentModel.DisplayNameAttribute`
@@ -233,3 +231,94 @@ builder
     .AddControllers()
     .AddJsonOptions(jsonOptions => options.CopyTo(jsonOptions.JsonSerializerOptions));
 ```
+
+## JsonStringEnumMemberNameAttribute support
+
+### If you target .NET 9
+
+It already includes the newer (but not stable) `9.0.0` version of `System.Text.Json` nuget package
+that contains this attribute.
+
+So this package - since it targets `net9.0` as well - directly uses this attribute type.
+
+### If you target a framework other than .NET 9
+
+For target frameworks other than `net9.0` currently this package references the latest stable
+(`8.0.5`) version of the `System.Text.Json` nuget package that does not contain this attribute.
+
+It means that in this case the `JsonEnumValueSerializer` checks for this attribute by name and uses
+reflection to get the value of its `Name` property.
+
+This package will be updated to use the `9.0.0` version of the `System.Text.Json` nuget package
+as soon as a stable version of it is available.
+
+### Using this attribute
+
+Since the `JsonEnumValueSerializer` can check for this attribute by name you can start using
+(or migrate to) this attribute without the need to reference the newer (but not stable)
+`9.0.0` version of `System.Text.Json` nuget package.
+
+All you need to do is to create an attribute with the same name within the same namespace
+in your project.
+
+You can find the source code for this attribute here:  
+[JsonStringEnumMemberNameAttribute](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonStringEnumMemberNameAttribute.cs)
+
+**Please note:**  
+For this workaround to work neither the copy of the attribute nor the enum types using that copy
+should be in an assembly that references the `9.0.0` version of the `System.Text.Json` nuget package.
+Otherwise, you will get either a
+[CS0436 compiler warning](https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0436) or a
+[CS0433 compiler error](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs0433).
+
+*Important:*
+`System.Text.Json` will not target `net6.0` starting with version `9.0.0` which means
+that the `net6.0` version of this package will keep using the `8.0.5` version of it,
+hence you can keep your copy of the attribute in this case.
+
+#### AppContext switch
+
+To be on the safe side you also need to set a switch at application startup so that
+the `JsonEnumValueSerializer` will check for this attribute always by name
+even if you upgrade to the `9.0.0` version of the `System.Text.Json` nuget package.
+
+Option #1 - Set the switch in the code at application startup
+
+```csharp
+using System;
+using EgonsoftHU.Text.Json.Constants;
+
+AppContext.SetSwitch(AppContextSwitches.AlwaysCheckForJsonStringEnumMemberAttributeByName, true);
+```
+
+Option #2 - Set the switch in the startup project's .csproj file (in case of an SDK-style project)
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Rest is omitted for clarity -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption
+      Include="Switch.EgonsoftHU.Text.Json.AlwaysCheckForJsonStringEnumMemberAttributeByName"
+      Value="true"
+    />
+  </ItemGroup>
+</Project>
+```
+
+Option #3 - Set the switch in the startup project's App.config file (in case of a classic .NET Framework project)
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <!-- Rest is omitted for clarity -->
+  <runtime>
+    <AppContextSwitchOverrides
+      value="Switch.EgonsoftHU.Text.Json.AlwaysCheckForJsonStringEnumMemberAttributeByName=true"
+    />
+  </runtime>
+</configuration>
+```
+
+**Please note:**  
+Before removing this switch after upgrading to the `9.0.0` version of the `System.Text.Json` nuget package,
+make sure you deleted your copy of the attribute and your enum types reference the original attribute.
