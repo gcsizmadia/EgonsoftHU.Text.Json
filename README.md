@@ -8,7 +8,7 @@
 
 - Supports any attribute for enum member serialization.
 - Provides option for using your own custom serializer implementation for enum members.
-- Many more...
+- and much more...
 
 ## Table of Contents
 
