@@ -38,7 +38,7 @@ namespace EgonsoftHU.Text.Json.Serialization.Converters
         /// Initializes an instance of the <see cref="JsonEnumValueSerializer"/> class with the specified <see cref="JsonNamingPolicy"/>.
         /// </summary>
         /// <param name="jsonNamingPolicy">The optional naming policy for reading and writing enum values.</param>
-        /// <param name="nameSelectorOption"></param>
+        /// <param name="nameSelectorOption">A value that specifies which attribute to use.</param>
         public JsonEnumValueSerializer(
             JsonNamingPolicy? jsonNamingPolicy = null,
             EnumMemberNameSelectorOption nameSelectorOption = EnumMemberNameSelectorOption.UseJsonStringEnumMemberNameAttribute
