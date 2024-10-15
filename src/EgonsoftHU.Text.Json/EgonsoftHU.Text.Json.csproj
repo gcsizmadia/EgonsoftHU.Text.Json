@@ -14,35 +14,35 @@
     <Title>Egonsoft.HU JSON Library</Title>
     <Description>System.Text.Json extensions.
 
-      Supports any attribute for enum member serialization.
-      Provides option for using your own custom serializer implementation for enum members.
+Supports any attribute for enum member serialization.
+Provides option for using your own custom serializer implementation for enum members.
 
-      Built-in attribute support:
+Built-in attribute support:
 System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute (&gt;= 9.0.0)
-      System.Runtime.Serialization.EnumMemberAttribute
-      System.ComponentModel.DescriptionAttribute
-      System.ComponentModel.DisplayNameAttribute
-      System.ComponentModel.DataAnnotations.DisplayAttribute
+System.Runtime.Serialization.EnumMemberAttribute
+System.ComponentModel.DescriptionAttribute
+System.ComponentModel.DisplayNameAttribute
+System.ComponentModel.DataAnnotations.DisplayAttribute
 
-      Commonly Used Types:
-      EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter
-      EgonsoftHU.Text.Json.Serialization.Converters.JsonEnumValueSerializer
+Commonly Used Types:
+EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter
+EgonsoftHU.Text.Json.Serialization.Converters.JsonEnumValueSerializer
 EgonsoftHU.Text.Json.JsonSerializerOptionsProvider</Description>
     <Summary>System.Text.Json extensions.
 
-      Supports any attribute for enum member serialization.
-      Provides option for using your own custom serializer implementation for enum members.
+Supports any attribute for enum member serialization.
+Provides option for using your own custom serializer implementation for enum members.
 
-      Built-in attribute support:
+Built-in attribute support:
 System.Text.Json.Serialization.JsonStringEnumMemberNameAttribute (&gt;= 9.0.0)
-      System.Runtime.Serialization.EnumMemberAttribute
-      System.ComponentModel.DescriptionAttribute
-      System.ComponentModel.DisplayNameAttribute
-      System.ComponentModel.DataAnnotations.DisplayAttribute
+System.Runtime.Serialization.EnumMemberAttribute
+System.ComponentModel.DescriptionAttribute
+System.ComponentModel.DisplayNameAttribute
+System.ComponentModel.DataAnnotations.DisplayAttribute
 
-      Commonly Used Types:
-      EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter
-      EgonsoftHU.Text.Json.Serialization.Converters.JsonEnumValueSerializer
+Commonly Used Types:
+EgonsoftHU.Text.Json.Serialization.JsonStringEnumConverter
+EgonsoftHU.Text.Json.Serialization.Converters.JsonEnumValueSerializer
 EgonsoftHU.Text.Json.JsonSerializerOptionsProvider</Summary>
     <!--
     <Copyright></Copyright>
